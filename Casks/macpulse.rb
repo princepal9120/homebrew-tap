@@ -4,12 +4,24 @@ cask "macpulse" do
 
   url "https://github.com/princepal9120/MacPulse/releases/download/v#{version}/MacPulse-#{version}.dmg"
   name "MacPulse"
-  desc "Native macOS system cleaner and deep uninstaller"
-  homepage "https://trymacpulse.pages.dev"
+  desc "Native system cleaner and deep uninstaller"
+  homepage "https://trymacpulse.pages.dev/"
 
-  depends_on macos: ">= :tahoe"
+  livecheck do
+    url :url
+    strategy :github_latest
+  end
+
+  depends_on macos: :tahoe
 
   app "MacPulse.app"
+
+  # Homebrew sets the download quarantine xattr (0181), which makes macOS 26
+  # refuse to launch this ad-hoc-signed app ("Not Opened", no override).
+  postflight_steps do
+    run "/usr/bin/xattr",
+        args: ["-cr", "{{appdir}}/MacPulse.app"]
+  end
 
   zap trash: [
     "~/Library/Application Support/MacPulse",
@@ -17,4 +29,3 @@ cask "macpulse" do
     "~/Library/Preferences/input.MacPulse.plist",
   ]
 end
-
